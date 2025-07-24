@@ -1,28 +1,38 @@
-# backend/services/structuring.py
-import fitz # Or your preferred PDF library from Round 1
-import re
-
-# Your existing logic for identifying headings goes here
-# ...
+import fitz  # PyMuPDF
 
 def get_document_structure(file_path: str) -> dict:
     """
-    Processes a single PDF file and returns its structured outline.
-    This function contains your core logic from Round 1A.
+    Processes a single PDF file and returns its structured outline (title + H1/H2/H3 headings).
     """
     doc = fitz.open(file_path)
     title = doc.metadata.get("title") or "Untitled"
     outline = []
 
-    # Your loop to go through pages and extract headings
     for page_num, page in enumerate(doc, start=1):
-        # ... your heading extraction logic ...
-        # Example:
-        # if is_heading(text):
-        #     outline.append({"level": "H1", "text": "...", "page": page_num})
-        pass # Replace with your actual implementation
+        blocks = page.get_text("dict")["blocks"]
+        for b in blocks:
+            if "lines" in b:
+                for line in b["lines"]:
+                    text = " ".join([span["text"] for span in line["spans"]]).strip()
+                    font_size = line["spans"][0]["size"]
+                    font_flags = line["spans"][0]["flags"]  # Flags can tell bold/italic
+                    
+                    # Optional: Use flags to ensure we skip regular body text
+                    is_bold = bool(font_flags & 2)
 
-    # The output must match the required JSON format from the challenge [cite: 43]
+                    if not text or len(text) < 5:
+                        continue
+                    
+                    # Heading heuristics
+                    if font_size > 15:
+                        outline.append({"level": "H1", "text": text, "page": page_num})
+                    elif 12 < font_size <= 15 and is_bold:
+                        outline.append({"level": "H2", "text": text, "page": page_num})
+                    elif 10 < font_size <= 12 and is_bold:
+                        outline.append({"level": "H3", "text": text, "page": page_num})
+
+    doc.close()
+
     return {
         "title": title,
         "outline": outline
