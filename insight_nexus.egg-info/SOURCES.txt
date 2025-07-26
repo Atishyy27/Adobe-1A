@@ -1,7 +1,0 @@
-pyproject.toml
-Backend/__init__.py
-Backend/main.py
-insight_nexus.egg-info/PKG-INFO
-insight_nexus.egg-info/SOURCES.txt
-insight_nexus.egg-info/dependency_links.txt
-insight_nexus.egg-info/top_level.txt

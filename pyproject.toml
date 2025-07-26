@@ -1,8 +1,0 @@
-# pyproject.toml
-
-[project]
-name = "insight_nexus"
-version = "0.1.0"
-
-[tool.setuptools]
-packages = ["Backend"]
