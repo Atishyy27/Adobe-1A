@@ -1,46 +1,33 @@
 import re
 from collections import Counter
 
-def get_font_stats(pages_data):
-    """Analyzes text blocks to find the document's body text style."""
-    if not pages_data:
-        return 12
-    sizes = [block["font_size"] for page in pages_data for block in page["blocks"]]
-    if not sizes:
-        return 12
-    # Find the most common font size
-    most_common_size = Counter(sizes).most_common(1)[0][0]
-    return most_common_size
-
-def is_bold(font_name):
-    """Checks if a font name suggests it is bold."""
-    return any(x in font_name.lower() for x in ['bold', 'black', 'heavy', 'oblique'])
-
 def clean_text(text):
-    """Cleans up text by removing extra spaces and non-printable chars."""
     return re.sub(r'\s+', ' ', text).strip()
 
+def is_bold(font_name):
+    return any(x in font_name.lower() for x in ['bold', 'black', 'heavy', 'medium', 'demi'])
+
+def get_body_font_size(pages_data):
+    sizes = [block["font_size"] for page in pages_data for block in page["blocks"]]
+    return Counter(sizes).most_common(1)[0][0] if sizes else 12
+
 def detect_headings(pages_data):
-    """Analyzes text blocks using advanced heuristics to identify a hierarchical outline."""
     if not pages_data:
         return "No Title Found", []
 
-    body_font_size = get_font_stats(pages_data)
+    body_font_size = get_body_font_size(pages_data)
     potential_headings = []
 
-    # --- Step 1: Extract potential headings, skipping the first page ---
-    for page_num, page in enumerate(pages_data):
-        # The first page (index 0) usually contains the title, not headings.
-        if page_num == 0:
-            continue
-
-        y_positions = [round(block["bbox"][1]) for block in page["blocks"]]
+    for page in pages_data[1:]:
+        y_positions = [round(b["bbox"][1]) for b in page["blocks"]]
         y_counts = Counter(y_positions)
-        
+
         for block in page["blocks"]:
             text = clean_text(block["text"])
             font_size = block["font_size"]
             y0 = round(block["bbox"][1])
+
+            is_semantic = text.endswith(":") or text.istitle()
 
             if not text or font_size <= body_font_size:
                 continue
@@ -48,14 +35,12 @@ def detect_headings(pages_data):
                 continue
             if re.search(r'\b(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b', text.upper()):
                 continue
-            if len(text) < 3:
+            if len(text) < 3 or len(text.split()) > 25:
                 continue
-            if re.match(r'^version\s*\d+\.\d+', text, re.IGNORECASE): # Ignore "Version X.Y"
-                continue
-            if len(text.split()) > 15:
+            if re.match(r'^version\s*\d+\.\d+', text, re.IGNORECASE):
                 continue
 
-            if is_bold(block["font_name"]) or font_size > body_font_size + 1:
+            if is_semantic or is_bold(block["font_name"]) or font_size > body_font_size + 1:
                 potential_headings.append({
                     "text": text,
                     "page": page["page_num"],
@@ -63,57 +48,64 @@ def detect_headings(pages_data):
                     "bbox": block["bbox"]
                 })
 
-    if not potential_headings:
-        return "No Title Found", []
+    # Merge multiline headings
+    merged = []
+    temp = []
 
-    merged_headings = []
-    if potential_headings:
-        current_heading = potential_headings[0]
-        for i in range(1, len(potential_headings)):
-            next_heading = potential_headings[i]
-            if (next_heading["page"] == current_heading["page"] and
-                abs(next_heading["bbox"][1] - current_heading["bbox"][3]) < 10 and
-                abs(next_heading["font_size"] - current_heading["font_size"]) < 2):
-                current_heading["text"] += " " + next_heading["text"]
+    def flush():
+        if temp:
+            merged.append({
+                "text": ' '.join([x["text"] for x in temp]),
+                "page": temp[0]["page"],
+                "font_size": temp[0]["font_size"],
+                "bbox": temp[0]["bbox"]
+            })
+            temp.clear()
+
+    for heading in potential_headings:
+        if not temp:
+            temp.append(heading)
+        else:
+            prev = temp[-1]
+            close = abs(heading["bbox"][1] - prev["bbox"][3]) < 25
+            same_page = heading["page"] == prev["page"]
+            similar_font = abs(heading["font_size"] - prev["font_size"]) <= 1
+            if same_page and close and similar_font:
+                temp.append(heading)
             else:
-                merged_headings.append(current_heading)
-                current_heading = next_heading
-        merged_headings.append(current_heading)
+                flush()
+                temp.append(heading)
+    flush()
 
-    heading_font_sizes = sorted(list(set(h["font_size"] for h in merged_headings)), reverse=True)
-    level_map = {size: f"H{i+1}" for i, size in enumerate(heading_font_sizes[:3])}
-    
+    # Assign heading levels
+    font_sizes = sorted({h["font_size"] for h in merged}, reverse=True)
+    level_map = {size: f"H{i+1}" for i, size in enumerate(font_sizes)}
+
     outline = []
-    common_h1_titles = ["table of contents", "revision history", "acknowledgements", "references", "introduction", "syllabus"]
+    for h in merged:
+        level = level_map.get(h["font_size"], "H3")
+        text = h["text"]
 
-    for heading in merged_headings:
-        text = heading["text"]
-        level = level_map.get(heading["font_size"], "H3")
+        if re.match(r'^\s*\d+(\.\d+)*\s+', text):
+            depth = text.split()[0].count('.')
+            level = f"H{min(depth + 1, 3)}"
+            text = clean_text(re.sub(r'^\s*\d+(\.\d+)*\s+', '', text))
 
-        if any(common_title in text.lower() for common_title in common_h1_titles):
-            level = "H1"
+        outline.append({
+            "level": level,
+            "text": text,
+            "page": h["page"],
+            "y": h["bbox"][1]
+        })
 
-        match = re.match(r'^\s*(\d+(\.\d+)*)\s*', text)
-        if match:
-            depth = match.group(1).count('.')
-            level = f"H{depth + 1}"
-            text = clean_text(text[len(match.group(0)):])
-        
-        if not text:
-            continue
-            
-        outline.append({"level": level, "text": text, "page": heading["page"], "y": heading["bbox"][1]})
+    title = "Overview"
+    if pages_data[0]["blocks"]:
+        sorted_blocks = sorted(pages_data[0]["blocks"], key=lambda b: b["font_size"], reverse=True)
+        title = clean_text(sorted_blocks[0]["text"])
 
-    title = "Overview" # Default title
-    if pages_data and pages_data[0]["blocks"]:
-        first_page_blocks = sorted([b for b in pages_data[0]["blocks"] if b['text']], key=lambda b: b["font_size"], reverse=True)
-        if first_page_blocks:
-            title = first_page_blocks[0]["text"]
-
-    final_outline = [item for item in outline if item["text"].lower() != title.lower()]
-    final_outline.sort(key=lambda x: (x['page'], x['y']))
-    
-    for item in final_outline:
-        del item['y']
+    final_outline = [h for h in outline if h["text"].lower() != title.lower()]
+    final_outline.sort(key=lambda x: (x["page"], x["y"]))
+    for h in final_outline:
+        h.pop("y", None)
 
     return title, final_outline
