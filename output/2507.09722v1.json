@@ -1,0 +1,200 @@
+{
+    "title": "Compression and Reconnection Investigations of the MagnetoPause",
+    "outline": [
+        {
+            "level": "H1",
+            "text": "Introduction",
+            "page": 2
+        },
+        {
+            "level": "H2",
+            "text": "Science Overview and Open Science Questions",
+            "page": 3
+        },
+        {
+            "level": "H3",
+            "text": "Mesoscale Structures",
+            "page": 3
+        },
+        {
+            "level": "H3",
+            "text": "Magnetospheric Ion Outflows",
+            "page": 5
+        },
+        {
+            "level": "H3",
+            "text": "Radiation Belt Dynamics",
+            "page": 5
+        },
+        {
+            "level": "H2",
+            "text": "Mission Design Overview",
+            "page": 6
+        },
+        {
+            "level": "H1",
+            "text": "Scientific Motivation and Objectives",
+            "page": 6
+        },
+        {
+            "level": "H2",
+            "text": "Objective 1: Magnetospheric Plasma Outflows and Their Effect on Magnetic Reconnection",
+            "page": 6
+        },
+        {
+            "level": "H2",
+            "text": "Objective 2: Mesoscale Phenomenological Effects on the Magnetopause",
+            "page": 8
+        },
+        {
+            "level": "H2",
+            "text": "Objective 3: Radiation Belt Electron Loss Dynamics",
+            "page": 9
+        },
+        {
+            "level": "H1",
+            "text": "Instruments",
+            "page": 10
+        },
+        {
+            "level": "H2",
+            "text": "Magnetic Field Measurements",
+            "page": 10
+        },
+        {
+            "level": "H2",
+            "text": "Particle Measurements - Electrons",
+            "page": 11
+        },
+        {
+            "level": "H2",
+            "text": "Particle Measurements - Ions",
+            "page": 11
+        },
+        {
+            "level": "H2",
+            "text": "Data Sufficiency and Analysis",
+            "page": 11
+        },
+        {
+            "level": "H3",
+            "text": "Objective 1",
+            "page": 12
+        },
+        {
+            "level": "H3",
+            "text": "Objective 2",
+            "page": 12
+        },
+        {
+            "level": "H3",
+            "text": "Objective 3",
+            "page": 13
+        },
+        {
+            "level": "H1",
+            "text": "Mission Design",
+            "page": 13
+        },
+        {
+            "level": "H2",
+            "text": "Overview",
+            "page": 13
+        },
+        {
+            "level": "H2",
+            "text": "Science Mission Profile",
+            "page": 15
+        },
+        {
+            "level": "H2",
+            "text": "Orbital Configuration",
+            "page": 15
+        },
+        {
+            "level": "H2",
+            "text": "Launch Services and Launch Vehicle Compatibility",
+            "page": 16
+        },
+        {
+            "level": "H1",
+            "text": "Spacecraft Design",
+            "page": 18
+        },
+        {
+            "level": "H2",
+            "text": "Overview",
+            "page": 18
+        },
+        {
+            "level": "H2",
+            "text": "Propulsion System",
+            "page": 20
+        },
+        {
+            "level": "H2",
+            "text": "Attitude Determination and Control System",
+            "page": 20
+        },
+        {
+            "level": "H2",
+            "text": "Telecommunications and Ground System",
+            "page": 21
+        },
+        {
+            "level": "H3",
+            "text": "Data Processing and Archiving",
+            "page": 22
+        },
+        {
+            "level": "H2",
+            "text": "Command & Data Handling System and Flight Software",
+            "page": 23
+        },
+        {
+            "level": "H2",
+            "text": "Thermal System",
+            "page": 24
+        },
+        {
+            "level": "H2",
+            "text": "Power System",
+            "page": 24
+        },
+        {
+            "level": "H2",
+            "text": "Mechanical System and Spacecraft Configuration",
+            "page": 26
+        },
+        {
+            "level": "H3",
+            "text": "Radiation Shielding",
+            "page": 27
+        },
+        {
+            "level": "H1",
+            "text": "Cost Analysis",
+            "page": 27
+        },
+        {
+            "level": "H1",
+            "text": "Discussion",
+            "page": 29
+        },
+        {
+            "level": "H2",
+            "text": "Links to the HSO",
+            "page": 29
+        },
+        {
+            "level": "H2",
+            "text": "Guest Investigator Opportunities and Magnetotail Mesoscale Dynamics",
+            "page": 29
+        },
+        {
+            "level": "H1",
+            "text": "Conclusion",
+            "page": 30
+        }
+    ]
+}
